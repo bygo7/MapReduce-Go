@@ -1,0 +1,319 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: master-service
+spec:
+    selector:
+        app: mapreduce-master
+    clusterIP: None
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: master-ingress
+    annotations:
+        service.beta.kubernetes.io/azure-load-balancer-resource-group: MC_MapReduce_group_MapReduce_eastus
+        service.beta.kubernetes.io/azure-pip-name: MapReduceGatewayIP
+        service.beta.kubernetes.io/azure-dns-label-name: mapreducet20
+spec:
+    type: LoadBalancer
+    ports:
+        - port: 80
+          targetPort: 8090
+    selector:
+        app: mapreduce-master
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: worker-service-0
+spec:
+    selector:
+        app: mapreduce-worker-0
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: worker-service-1
+spec:
+    selector:
+        app: mapreduce-worker-1
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: worker-service-2
+spec:
+    selector:
+        app: mapreduce-worker-2
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: worker-service-3
+spec:
+    selector:
+        app: mapreduce-worker-3
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: worker-service-4
+spec:
+    selector:
+        app: mapreduce-worker-4
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: worker-service-5
+spec:
+    selector:
+        app: mapreduce-worker-5
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: worker-service-6
+spec:
+    selector:
+        app: mapreduce-worker-6
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: master-pod
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: mapreduce-master
+    template:
+        metadata:
+            labels:
+                app: mapreduce-master
+        spec:
+            containers:
+                - name: master-container
+                  image: mapreducet20registry.azurecr.io/mapreduce/master:20231122-205623
+                  imagePullPolicy: IfNotPresent
+                  args: ["-name=master", "-logtostderr=true", "-failureNode=-1", "-failurePoint=21", "-launchTime=1700704583"]
+                  ports:
+                  - containerPort: 8080
+                  - containerPort: 8090
+                  env:
+                  - name: POD_IP
+                    valueFrom:
+                        fieldRef:
+                            fieldPath: status.podIP
+                  livenessProbe:
+                        httpGet:
+                            path: /healthz
+                            port: 8090
+                        initialDelaySeconds: 5
+                        periodSeconds: 5
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: worker-pod-0
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mapreduce-worker-0
+    template:
+        metadata:
+            labels:
+                app: mapreduce-worker-0
+        spec:
+            containers:
+            - name: worker-container
+              image: mapreducet20registry.azurecr.io/mapreduce/worker:20231122-205623
+              imagePullPolicy: IfNotPresent
+              args: ["-name=worker-0", "-serviceName=worker-service-0", "-logtostderr=true", "-failurePoint=0"]
+              ports:
+              - containerPort: 8080
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: worker-pod-1
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mapreduce-worker-1
+    template:
+        metadata:
+            labels:
+                app: mapreduce-worker-1
+        spec:
+            containers:
+            - name: worker-container
+              image: mapreducet20registry.azurecr.io/mapreduce/worker:20231122-205623
+              imagePullPolicy: IfNotPresent
+              args: ["-name=worker-1", "-serviceName=worker-service-1", "-logtostderr=true", "-failurePoint=0"]
+              ports:
+              - containerPort: 8080
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: worker-pod-2
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mapreduce-worker-2
+    template:
+        metadata:
+            labels:
+                app: mapreduce-worker-2
+        spec:
+            containers:
+            - name: worker-container
+              image: mapreducet20registry.azurecr.io/mapreduce/worker:20231122-205623
+              imagePullPolicy: IfNotPresent
+              args: ["-name=worker-2", "-serviceName=worker-service-2", "-logtostderr=true", "-failurePoint=0"]
+              ports:
+              - containerPort: 8080
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: worker-pod-3
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mapreduce-worker-3
+    template:
+        metadata:
+            labels:
+                app: mapreduce-worker-3
+        spec:
+            containers:
+            - name: worker-container
+              image: mapreducet20registry.azurecr.io/mapreduce/worker:20231122-205623
+              imagePullPolicy: IfNotPresent
+              args: ["-name=worker-3", "-serviceName=worker-service-3", "-logtostderr=true", "-failurePoint=0"]
+              ports:
+              - containerPort: 8080
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: worker-pod-4
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mapreduce-worker-4
+    template:
+        metadata:
+            labels:
+                app: mapreduce-worker-4
+        spec:
+            containers:
+            - name: worker-container
+              image: mapreducet20registry.azurecr.io/mapreduce/worker:20231122-205623
+              imagePullPolicy: IfNotPresent
+              args: ["-name=worker-4", "-serviceName=worker-service-4", "-logtostderr=true", "-failurePoint=0"]
+              ports:
+              - containerPort: 8080
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: worker-pod-5
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mapreduce-worker-5
+    template:
+        metadata:
+            labels:
+                app: mapreduce-worker-5
+        spec:
+            containers:
+            - name: worker-container
+              image: mapreducet20registry.azurecr.io/mapreduce/worker:20231122-205623
+              imagePullPolicy: IfNotPresent
+              args: ["-name=worker-5", "-serviceName=worker-service-5", "-logtostderr=true", "-failurePoint=0"]
+              ports:
+              - containerPort: 8080
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: worker-pod-6
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mapreduce-worker-6
+    template:
+        metadata:
+            labels:
+                app: mapreduce-worker-6
+        spec:
+            containers:
+            - name: worker-container
+              image: mapreducet20registry.azurecr.io/mapreduce/worker:20231122-205623
+              imagePullPolicy: IfNotPresent
+              args: ["-name=worker-6", "-serviceName=worker-service-6", "-logtostderr=true", "-failurePoint=0"]
+              ports:
+              - containerPort: 8080
+---
